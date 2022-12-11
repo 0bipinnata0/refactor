@@ -19,30 +19,6 @@ export type Plays = {
 };
 
 function statement(invoice: Invoice, plays: Plays) {
-	function amountFor(aPerformance: PlayPerformance) {
-		let result = 0;
-		switch (playFor(aPerformance).type) {
-			case 'tragedy':
-				result = 40_000;
-				if (aPerformance.audience > 30) {
-					result += 1_000 * (aPerformance.audience - 30);
-				}
-				break;
-			case 'comedy':
-				result = 30_000;
-				if (aPerformance.audience > 20) {
-					result += 10_000 + 500 * (aPerformance.audience - 20);
-				}
-				result += 300 * aPerformance.audience;
-				break;
-			default:
-				throw new Error(`unknown type: ${playFor(aPerformance).type}`);
-		}
-		return result;
-	}
-	function playFor(aPerformance: PlayPerformance) {
-		return plays[aPerformance.playID];
-	}
 	let totalAmount = 0;
 	let volumeCredits = 0;
 	let result = `Statement for ${invoice.customer}\n`;
@@ -53,15 +29,15 @@ function statement(invoice: Invoice, plays: Plays) {
 	}).format;
 
 	for (const perf of invoice.performances) {
-		const thisAmount = amountFor(perf);
+		const play = plays[perf.playID];
+		const thisAmount = amountFor(perf, play);
 		//  add volume credits
 		volumeCredits += Math.max(perf.audience - 30, 0);
 		//  add extra credit for every ten comedy attendees
-		if ('comedy' === playFor(perf).type)
-			volumeCredits += Math.floor(perf.audience / 5);
+		if ('comedy' === play.type) volumeCredits += Math.floor(perf.audience / 5);
 
 		// print line for this order
-		result += ` ${playFor(perf).name}: ${format(thisAmount / 100)} (${
+		result += ` ${play.name}: ${format(thisAmount / 100)} (${
 			perf.audience
 		} seats)\n`;
 		totalAmount += thisAmount;
@@ -69,6 +45,29 @@ function statement(invoice: Invoice, plays: Plays) {
 
 	result += `Amount owed is ${format(totalAmount / 100)}\n`;
 	result += `You earned ${volumeCredits} credits\n`;
+	return result;
+}
+
+function amountFor(aPerformance: PlayPerformance, play: PlayValue) {
+	let result = 0;
+
+	switch (play.type) {
+		case 'tragedy':
+			result = 40_000;
+			if (aPerformance.audience > 30) {
+				result += 1_000 * (aPerformance.audience - 30);
+			}
+			break;
+		case 'comedy':
+			result = 30_000;
+			if (aPerformance.audience > 20) {
+				result += 10_000 + 500 * (aPerformance.audience - 20);
+			}
+			result += 300 * aPerformance.audience;
+			break;
+		default:
+			throw new Error(`unknown type: ${play.type}`);
+	}
 	return result;
 }
 
