@@ -19,21 +19,11 @@ export type Plays = {
 };
 
 function statement(invoice: Invoice, plays: Plays) {
-	const stateData = {
-		customer: invoice.customer,
-		performances: invoice.performances
-	};
-	return renderPlainText(stateData, plays);
+	return renderPlainText(invoice, plays);
 }
-function renderPlainText(
-	data: {
-		customer: string;
-		performances: PlayPerformance[];
-	},
-	plays: Plays
-) {
-	let result = `Statement for ${data.customer}\n`;
-	for (const perf of data.performances) {
+function renderPlainText(invoice: Invoice, plays: Plays) {
+	let result = `Statement for ${invoice.customer}\n`;
+	for (const perf of invoice.performances) {
 		// print line for this order
 		result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
 			perf.audience
@@ -89,7 +79,7 @@ function renderPlainText(
 
 	function totalVolumeCredit() {
 		let result = 0;
-		for (const perf of data.performances) {
+		for (const perf of invoice.performances) {
 			result += volumeCreditsFor(perf);
 		}
 		return result;
@@ -99,7 +89,7 @@ function renderPlainText(
 	// function appleSauce() {
 	function totalAmount() {
 		let result = 0;
-		for (const perf of data.performances) {
+		for (const perf of invoice.performances) {
 			// print line for this order
 			result += amountFor(perf);
 		}
