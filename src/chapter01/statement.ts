@@ -19,6 +19,18 @@ export type Plays = {
 };
 
 function statement(invoice: Invoice, plays: Plays) {
+	let result = `Statement for ${invoice.customer}\n`;
+	for (const perf of invoice.performances) {
+		// print line for this order
+		result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
+			perf.audience
+		} seats)\n`;
+	}
+
+	result += `Amount owed is ${usd(totalAmount() / 100)}\n`;
+	result += `You earned ${totalVolumeCredit()} credits\n`;
+	return result;
+
 	function amountFor(aPerformance: PlayPerformance) {
 		let result = 0;
 		switch (playFor(aPerformance).type) {
@@ -80,18 +92,6 @@ function statement(invoice: Invoice, plays: Plays) {
 		}
 		return result;
 	}
-
-	let result = `Statement for ${invoice.customer}\n`;
-	for (const perf of invoice.performances) {
-		// print line for this order
-		result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
-			perf.audience
-		} seats)\n`;
-	}
-
-	result += `Amount owed is ${usd(totalAmount() / 100)}\n`;
-	result += `You earned ${totalVolumeCredit()} credits\n`;
-	return result;
 }
 
 export default statement;
