@@ -1,21 +1,23 @@
-type Invoice = {
+export type Invoice = {
 	customer: string;
 	performances: PlayPerformance[];
 };
 
-type PlayPerformance = {
+export type PlayPerformance = {
 	playID: PlayType;
 	audience: number;
 };
 
-type PlayType = 'hamlet' | 'as-like' | 'othello';
-
-type Plays = {
-	[key in PlayType]: {
-		name: string;
-		type: 'tragedy' | 'comedy';
-	};
+export type PlayType = 'hamlet' | 'as-like' | 'othello';
+export type PlayValue = {
+	name: string;
+	type: 'tragedy' | 'comedy';
 };
+
+export type Plays = {
+	[key in PlayType]: PlayValue;
+};
+
 function statement(invoice: Invoice, plays: Plays) {
 	let totalAmount = 0;
 	let volumeCredits = 0;
@@ -28,26 +30,7 @@ function statement(invoice: Invoice, plays: Plays) {
 
 	for (const perf of invoice.performances) {
 		const play = plays[perf.playID];
-		let thisAmount = 0;
-
-		switch (play.type) {
-			case 'tragedy':
-				thisAmount = 40_000;
-				if (perf.audience > 30) {
-					thisAmount += 1_000 * (perf.audience - 30);
-				}
-				break;
-			case 'comedy':
-				thisAmount = 30_000;
-				if (perf.audience > 20) {
-					thisAmount += 10_000 + 500 * (perf.audience - 20);
-				}
-				thisAmount += 300 * perf.audience;
-				break;
-			default:
-				throw new Error(`unknown type: ${play.type}`);
-		}
-
+		const thisAmount = amountFor(perf, play);
 		//  add volume credits
 		volumeCredits += Math.max(perf.audience - 30, 0);
 		//  add extra credit for every ten comedy attendees
@@ -63,6 +46,29 @@ function statement(invoice: Invoice, plays: Plays) {
 	result += `Amount owed is ${format(totalAmount / 100)}\n`;
 	result += `You earned ${volumeCredits} credits\n`;
 	return result;
+}
+
+function amountFor(perf: PlayPerformance, play: PlayValue) {
+	let thisAmount = 0;
+
+	switch (play.type) {
+		case 'tragedy':
+			thisAmount = 40_000;
+			if (perf.audience > 30) {
+				thisAmount += 1_000 * (perf.audience - 30);
+			}
+			break;
+		case 'comedy':
+			thisAmount = 30_000;
+			if (perf.audience > 20) {
+				thisAmount += 10_000 + 500 * (perf.audience - 20);
+			}
+			thisAmount += 300 * perf.audience;
+			break;
+		default:
+			throw new Error(`unknown type: ${play.type}`);
+	}
+	return thisAmount;
 }
 
 export default statement;
