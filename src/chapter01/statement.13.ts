@@ -24,20 +24,22 @@ export type Plays = {
 	[key in PlayType]: PlayValue;
 };
 
-function createStatementData(invoice: Invoice, plays: Plays) {
+function statement(invoice: Invoice, plays: Plays) {
 	const stateData = {
 		customer: invoice.customer,
 		performances: invoice.performances.map(enrichPerformance)
 	};
-	return {
-		...stateData,
-		totalVolumeCredit: totalVolumeCredit(stateData),
-		totalAmount: totalAmount(stateData)
-	};
+	return renderPlainText(
+		{
+			...stateData,
+			totalVolumeCredit: totalVolumeCredit(stateData),
+			totalAmount: totalAmount(stateData)
+		},
+		plays
+	);
 	function playFor(aPerformance: PlayPerformance) {
 		return plays[aPerformance.playID];
 	}
-
 	function amountFor(
 		aPerformance: PlayPerformance & {
 			play: PlayValue;
@@ -105,10 +107,6 @@ function createStatementData(invoice: Invoice, plays: Plays) {
 			volumeCredits: volumeCreditsFor(onePhase)
 		};
 	}
-}
-
-function statement(invoice: Invoice, plays: Plays) {
-	return renderPlainText(createStatementData(invoice, plays), plays);
 }
 
 function renderPlainText(
