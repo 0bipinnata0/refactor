@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './App.scss';
+import Chapter01 from './chapter01/Chapter01';
 
 function App() {
 	const [count, setCount] = useState(0);
@@ -18,6 +19,7 @@ function App() {
 				<button onClick={() => setCount(count - 1)}>-1</button>
 			</div>
 			<div>test home page</div>
+			<Chapter01 />
 		</div>
 	);
 }
