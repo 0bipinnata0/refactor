@@ -1,4 +1,4 @@
-import type { Invoice, PlayPerformance, Plays, PlayValue } from './statement';
+import type { Invoice, Plays } from './statement';
 function statement(invoice: Invoice, plays: Plays) {
 	let totalAmount = 0;
 	let volumeCredits = 0;
