@@ -18,4 +18,6 @@ pnpm i husky -D
 
 pnpm i commitlint @commitlint/cli @commitlint/config-conventional -D
 
+pnpm i -D lint-staged
+
 npx husky add .husky/commit-msg "npx --no-install commitlint -e $HUSKY_GIT_PARAMS"
