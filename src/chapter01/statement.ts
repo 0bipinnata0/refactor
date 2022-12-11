@@ -10,6 +10,7 @@ export type PlayPerformance = {
 
 type RichPlayPerformance = PlayPerformance & {
 	play: PlayValue;
+	amount: number;
 };
 
 export type PlayType = 'hamlet' | 'as-like' | 'othello';
@@ -31,31 +32,11 @@ function statement(invoice: Invoice, plays: Plays) {
 	function playFor(aPerformance: PlayPerformance) {
 		return plays[aPerformance.playID];
 	}
-	function enrichPerformance(aPerformance: PlayPerformance) {
-		return { ...aPerformance, play: playFor(aPerformance) };
-	}
-}
-
-function renderPlainText(
-	data: {
-		customer: string;
-		performances: RichPlayPerformance[];
-	},
-	plays: Plays
-) {
-	let result = `Statement for ${data.customer}\n`;
-	for (const perf of data.performances) {
-		// print line for this order
-		result += ` ${perf.play.name}: ${usd(amountFor(perf) / 100)} (${
-			perf.audience
-		} seats)\n`;
-	}
-
-	result += `Amount owed is ${usd(totalAmount() / 100)}\n`;
-	result += `You earned ${totalVolumeCredit()} credits\n`;
-	return result;
-
-	function amountFor(aPerformance: RichPlayPerformance) {
+	function amountFor(
+		aPerformance: PlayPerformance & {
+			play: PlayValue;
+		}
+	) {
 		let result = 0;
 		switch (aPerformance.play.type) {
 			case 'tragedy':
@@ -76,6 +57,38 @@ function renderPlainText(
 		}
 		return result;
 	}
+
+	function enrichPerformance(aPerformance: PlayPerformance) {
+		const result = {
+			...aPerformance,
+			play: playFor(aPerformance)
+		};
+		return {
+			...result,
+			amount: amountFor(result)
+		};
+	}
+}
+
+function renderPlainText(
+	data: {
+		customer: string;
+		performances: RichPlayPerformance[];
+	},
+	plays: Plays
+) {
+	let result = `Statement for ${data.customer}\n`;
+	for (const perf of data.performances) {
+		// print line for this order
+		result += ` ${perf.play.name}: ${usd(perf.amount / 100)} (${
+			perf.audience
+		} seats)\n`;
+	}
+
+	result += `Amount owed is ${usd(totalAmount() / 100)}\n`;
+	result += `You earned ${totalVolumeCredit()} credits\n`;
+	return result;
+
 	function volumeCreditsFor(aPerformance: RichPlayPerformance) {
 		let result = 0;
 		result += Math.max(aPerformance.audience - 30, 0);
@@ -109,7 +122,7 @@ function renderPlainText(
 		let result = 0;
 		for (const perf of data.performances) {
 			// print line for this order
-			result += amountFor(perf);
+			result += perf.amount;
 		}
 		return result;
 	}
