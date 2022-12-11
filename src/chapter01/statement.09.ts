@@ -19,9 +19,6 @@ export type Plays = {
 };
 
 function statement(invoice: Invoice, plays: Plays) {
-	return renderPlainText(invoice, plays);
-}
-function renderPlainText(invoice: Invoice, plays: Plays) {
 	let result = `Statement for ${invoice.customer}\n`;
 	for (const perf of invoice.performances) {
 		// print line for this order
@@ -96,4 +93,5 @@ function renderPlainText(invoice: Invoice, plays: Plays) {
 		return result;
 	}
 }
+
 export default statement;
