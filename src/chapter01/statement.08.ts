@@ -70,26 +70,17 @@ function statement(invoice: Invoice, plays: Plays) {
 		return result;
 	}
 
-	// appleSauce为临时变量名称
-	// function appleSauce() {
-	function totalAmount() {
-		let result = 0;
-		for (const perf of invoice.performances) {
-			// print line for this order
-			result += amountFor(perf);
-		}
-		return result;
-	}
-
+	let totalAmount = 0;
 	let result = `Statement for ${invoice.customer}\n`;
 	for (const perf of invoice.performances) {
 		// print line for this order
 		result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
 			perf.audience
 		} seats)\n`;
+		totalAmount += amountFor(perf);
 	}
 
-	result += `Amount owed is ${usd(totalAmount() / 100)}\n`;
+	result += `Amount owed is ${usd(totalAmount / 100)}\n`;
 	result += `You earned ${totalVolumeCredit()} credits\n`;
 	return result;
 }
