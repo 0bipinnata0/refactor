@@ -8,10 +8,6 @@ export type PlayPerformance = {
 	audience: number;
 };
 
-type RichPlayPerformance = PlayPerformance & {
-	play: PlayValue;
-};
-
 export type PlayType = 'hamlet' | 'as-like' | 'othello';
 export type PlayValue = {
 	name: string;
@@ -25,28 +21,21 @@ export type Plays = {
 function statement(invoice: Invoice, plays: Plays) {
 	const stateData = {
 		customer: invoice.customer,
-		performances: invoice.performances.map(enrichPerformance)
+		performances: invoice.performances
 	};
 	return renderPlainText(stateData, plays);
-	function playFor(aPerformance: PlayPerformance) {
-		return plays[aPerformance.playID];
-	}
-	function enrichPerformance(aPerformance: PlayPerformance) {
-		return { ...aPerformance, play: playFor(aPerformance) };
-	}
 }
-
 function renderPlainText(
 	data: {
 		customer: string;
-		performances: RichPlayPerformance[];
+		performances: PlayPerformance[];
 	},
 	plays: Plays
 ) {
 	let result = `Statement for ${data.customer}\n`;
 	for (const perf of data.performances) {
 		// print line for this order
-		result += ` ${perf.play.name}: ${usd(amountFor(perf) / 100)} (${
+		result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
 			perf.audience
 		} seats)\n`;
 	}
@@ -55,9 +44,9 @@ function renderPlainText(
 	result += `You earned ${totalVolumeCredit()} credits\n`;
 	return result;
 
-	function amountFor(aPerformance: RichPlayPerformance) {
+	function amountFor(aPerformance: PlayPerformance) {
 		let result = 0;
-		switch (aPerformance.play.type) {
+		switch (playFor(aPerformance).type) {
 			case 'tragedy':
 				result = 40_000;
 				if (aPerformance.audience > 30) {
@@ -72,15 +61,18 @@ function renderPlainText(
 				result += 300 * aPerformance.audience;
 				break;
 			default:
-				throw new Error(`unknown type: ${aPerformance.play.type}`);
+				throw new Error(`unknown type: ${playFor(aPerformance).type}`);
 		}
 		return result;
 	}
-	function volumeCreditsFor(aPerformance: RichPlayPerformance) {
+	function playFor(aPerformance: PlayPerformance) {
+		return plays[aPerformance.playID];
+	}
+	function volumeCreditsFor(aPerformance: PlayPerformance) {
 		let result = 0;
 		result += Math.max(aPerformance.audience - 30, 0);
 		//  add extra credit for every ten comedy attendees
-		if ('comedy' === aPerformance.play.type) {
+		if ('comedy' === playFor(aPerformance).type) {
 			result += Math.floor(aPerformance.audience / 5);
 		}
 		return result;
