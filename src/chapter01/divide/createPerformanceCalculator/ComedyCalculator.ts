@@ -9,6 +9,10 @@ class ComedyCalculator extends PerformanceCalculator {
 		result += 300 * this.performance.audience;
 		return result;
 	}
+
+	get volumeCredits(): number {
+		return super.volumeCredits + Math.floor(this.performance.audience / 5);
+	}
 }
 
 export default ComedyCalculator;
