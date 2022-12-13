@@ -2,7 +2,7 @@ import invoices from './invoices.json';
 
 import plays from './plays.json';
 
-import statement from './statement';
+import statement from './divide/statement';
 const Chapter01 = () => {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignored
